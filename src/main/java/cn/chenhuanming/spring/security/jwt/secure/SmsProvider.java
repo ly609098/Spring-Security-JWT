@@ -2,9 +2,10 @@ package cn.chenhuanming.spring.security.jwt.secure;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.GrantedAuthority;
 
 public class SmsProvider implements AuthenticationProvider {
 
@@ -17,9 +18,18 @@ public class SmsProvider implements AuthenticationProvider {
         SmsToken smsToken = (SmsToken) authentication;
 
 
-        User userByMobile = userService.findUserByMobile(smsToken.getMobile().toString());
-        if ()
-        return null;
+        User user = userService.findUserByMobile(smsToken.getMobile().toString());
+        if (user == null) {
+            throw new InternalAuthenticationServiceException("无法获取用户信息");
+        }
+        if (!smsToken.getCode().equals("1234")) {
+            throw new InternalAuthenticationServiceException("验证码错误");
+        }
+        SmsToken authenticationResult = new SmsToken(smsToken.getMobile().toString(), smsToken.getCode(), user.getAuthorities());
+        //将未认证的details放入已认证的details中去
+        authenticationResult.setDetails(smsToken.getDetails());
+
+        return authenticationResult;
     }
 
     @Override
