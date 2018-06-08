@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 public class SmsFilter extends AbstractAuthenticationProcessingFilter {
     public String mobile = "mobile";
     public String code = "code";
-    private String mobileParameter = "code";
+    private String mobileParameter = "mobile";
     private String codeParameter = "code";
     private boolean postOnly = true;
 
@@ -49,7 +49,7 @@ public class SmsFilter extends AbstractAuthenticationProcessingFilter {
     }
 
     protected String obtainMobile(HttpServletRequest request) {
-        return request.getParameter(this.codeParameter);
+        return request.getParameter(this.mobileParameter);
     }
 
     protected void setDetails(HttpServletRequest request, SmsToken authRequest) {
@@ -71,7 +71,7 @@ public class SmsFilter extends AbstractAuthenticationProcessingFilter {
     }
 
     public final String getMobileParameter() {
-        return this.codeParameter;
+        return this.mobileParameter;
     }
 
     public final String getCodeParameter() {

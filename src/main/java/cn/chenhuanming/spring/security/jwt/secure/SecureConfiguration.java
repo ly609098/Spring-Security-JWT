@@ -2,7 +2,7 @@ package cn.chenhuanming.spring.security.jwt.secure;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -11,9 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
-import java.util.Collections;
-
-import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 /**
  * Created by chenhuanming on 2017-07-18.
@@ -41,7 +38,7 @@ public class SecureConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.antMatcher("/**")
+        /*http.antMatcher("/**")
                 .authorizeRequests().antMatchers("/me").authenticated()
                 .anyRequest().permitAll()
                 .and()
@@ -51,7 +48,13 @@ public class SecureConfiguration extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(STATELESS)
                 .and()
                 .addFilterBefore(tokenAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
-                .csrf().disable();
+                .csrf().disable();*/
+        SmsFilter smsFilter =new SmsFilter();
+        smsFilter.setAuthenticationManager(http.getSharedObject(AuthenticationManager.class));
+        smsFilter.setAuthenticationFailureHandler(failHandler);
+        smsFilter.setAuthenticationSuccessHandler(successHandler);
+        SmsProvider smsProvider =new SmsProvider();
+        http.csrf().disable().authenticationProvider(smsProvider).addFilterAfter(smsFilter,UsernamePasswordAuthenticationFilter.class);
     }
 
    /* @Override
