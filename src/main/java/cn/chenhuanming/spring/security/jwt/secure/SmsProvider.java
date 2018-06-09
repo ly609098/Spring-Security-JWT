@@ -6,34 +6,45 @@ import org.springframework.security.authentication.InternalAuthenticationService
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SmsProvider implements AuthenticationProvider {
 
-    @Autowired
-    private UserService userService;
+  @Autowired private UserService userService;
+    @Autowired UserServiceImpl userServiceImpl;
 
-    @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+  @Override
+  public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
-        SmsToken smsToken = (SmsToken) authentication;
+    SmsToken smsToken = (SmsToken) authentication;
 
+    User user = userServiceImpl.findUserByMobile(smsToken.getMobile().toString());
+    if (user == null) {
+      throw new InternalAuthenticationServiceException("无法获取用户信息");
+    }
+    if (!smsToken.getCode().equals("1234")) {
+      throw new InternalAuthenticationServiceException("验证码错误");
+    }
+    SmsToken authenticationResult =
+        new SmsToken(smsToken.getMobile().toString(), smsToken.getCode(), user.getAuthorities());
+    // 将未认证的details放入已认证的details中去
+    authenticationResult.setDetails(smsToken.getDetails());
 
-        User user = userService.findUserByMobile(smsToken.getMobile().toString());
-        if (user == null) {
-            throw new InternalAuthenticationServiceException("无法获取用户信息");
-        }
-        if (!smsToken.getCode().equals("1234")) {
-            throw new InternalAuthenticationServiceException("验证码错误");
-        }
-        SmsToken authenticationResult = new SmsToken(smsToken.getMobile().toString(), smsToken.getCode(), user.getAuthorities());
-        //将未认证的details放入已认证的details中去
-        authenticationResult.setDetails(smsToken.getDetails());
+    return authenticationResult;
+  }
 
-        return authenticationResult;
+  @Override
+  public boolean supports(Class<?> authenticate) {
+    return SmsToken.class.isAssignableFrom(authenticate);
+  }
+
+    public UserDetailsService getUserDetailsService() {
+        return userServiceImpl;
     }
 
-    @Override
-    public boolean supports(Class<?> authenticate) {
-        return SmsToken.class.isAssignableFrom(authenticate);
+    public void setUserDetailsService(UserServiceImpl userDetailsService) {
+        this.userServiceImpl = userDetailsService;
     }
 }

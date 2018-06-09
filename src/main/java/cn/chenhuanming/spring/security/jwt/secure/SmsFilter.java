@@ -1,5 +1,6 @@
 package cn.chenhuanming.spring.security.jwt.secure;
 
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -40,9 +41,11 @@ public class SmsFilter extends AbstractAuthenticationProcessingFilter {
             mobile = mobile.trim();
             SmsToken authRequest = new SmsToken(mobile, code);
             this.setDetails(request, authRequest);
+
             return this.getAuthenticationManager().authenticate(authRequest);
         }
     }
+
 
     protected String obtainCode(HttpServletRequest request) {
         return request.getParameter(this.codeParameter);

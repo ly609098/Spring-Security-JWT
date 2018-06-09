@@ -9,7 +9,7 @@ import java.util.Collection;
 @Data
 public class User implements UserDetails {
     private Long id;
-    private String name;
+    private String username;
     private String password;
     private String mobile;
     private String code;
@@ -19,28 +19,24 @@ public class User implements UserDetails {
         return null;
     }
 
-    @Override
-    public String getUsername() {
-        return null;
-    }
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;
     }
 }
